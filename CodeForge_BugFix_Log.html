@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BITS Pilani Digital — CodeForge V1.0 Bug Fix Log</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 40px;
+    color: #111827;
+    background: #fff;
+    line-height: 1.5;
+  }
+  .header {
+    border-bottom: 3px solid #312e81;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+  }
+  h1 { margin: 0; color: #312e81; font-size: 24px; }
+  h2 { margin: 5px 0 15px; color: #5b3cc4; font-size: 16px; font-weight: 600; }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 13px;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 12px;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #eef2ff;
+    color: #1e1b4b;
+    font-weight: 700;
+  }
+  tr:nth-child(even) { background: #f8fafc; }
+  .bug-tag {
+    font-weight: 700;
+    color: #b91c1c;
+    background: #fee2e2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .enhancement-box {
+    background: #f8fafc;
+    border-left: 4px solid #4338ca;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border-radius: 0 8px 8px 0;
+  }
+  .enhancement-title {
+    font-weight: 700;
+    color: #312e81;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  @media print {
+    body { margin: 15mm; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BITS Pilani Digital — CodeForge V1.0</h1>
+  <h2>Official Bug Fix Log & Technical Enhancements Report</h2>
+  <div class="meta-grid">
+    <div><b>BITS ID:</b> 2026eb1100208</div>
+    <div><b>Event:</b> CodeForge V1.0 Debug. Reimagine. Deploy.</div>
+    <div><b>Application:</b> Advanced Grading Console</div>
+    <div><b>Stack:</b> HTML5, CSS3 Modern Flex/Grid, Vanilla JavaScript, SheetJS</div>
+  </div>
+</div>
+
+<h3 style="color:#1e1b4b;">1. Tabular Bug Fix Log</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 80px;">Bug #</th>
+      <th style="width: 120px;">Component</th>
+      <th>Issue Description</th>
+      <th>Root Cause Analysis</th>
+      <th>Fix Applied</th>
+      <th>Verification Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="bug-tag">BUG-01</span></td>
+      <td>Statistics Panel (Lines 220–223)</td>
+      <td><b>Inverted Min and Max Values:</b> Maximum value displayed under "Min" label and minimum value displayed under "Max".</td>
+      <td>HTML element ID mapping was flipped: <code>&lt;b id="max"&gt;</code> was placed under Min, and <code>&lt;b id="min"&gt;</code> under Max.</td>
+      <td>Renamed IDs to <code>statMin</code>, <code>statMax</code>, <code>statAvg</code>, <code>statMed</code> and mapped accordingly in JavaScript.</td>
+      <td>Verified with student marks array [15, 45, 92]. Min displays 15, Max displays 92. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-02</span></td>
+      <td>File Parser (Lines 312–322)</td>
+      <td><b>Stale & Duplicate Course Options:</b> Courses duplicate hundreds of times on sheet re-upload.</td>
+      <td>Course dropdown was never cleared on change, and entries were added per-row without set deduplication.</td>
+      <td>Cleared <code>courseSelect.innerHTML</code> and applied <code>[...new Set(courses)]</code> deduplication.</td>
+      <td>Tested with 150-row sheet spanning 2 courses; dropdown lists exactly 2 distinct courses. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-03</span></td>
+      <td>Canvas Bell Curve (Lines 425–439)</td>
+      <td><b>Divide-by-Zero Crash (NaN):</b> If all student marks are identical, the canvas freezes completely.</td>
+      <td>When all marks are identical, standard deviation &sigma; = 0. Gaussian formula divides by &sigma;, generating Infinity/NaN.</td>
+      <td>Added zero-division safety guard: <code>if (std &lt;= 0.001) return;</code>.</td>
+      <td>Tested with dataset where all scores = 75. Canvas renders bars without error. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-04</span></td>
+      <td>Session Timer (Lines 275–294)</td>
+      <td><b>Initial 1-Second Timer Delay:</b> Timer text remains static at "00:00" for the first 1000ms.</td>
+      <td><code>setInterval</code> delays first invocation until after 1000ms elapses.</td>
+      <td>Extracted <code>updateTimer()</code> and invoked it immediately upon DOM initialization before starting interval.</td>
+      <td>Timer updates instantly upon page load without delay. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-05</span></td>
+      <td>File Input Filter (Line 188)</td>
+      <td><b>Modern Excel Rejection:</b> File picker strictly forced <code>.xls</code>, blocking <code>.xlsx</code> and <code>.csv</code>.</td>
+      <td>Input tag had hardcoded <code>accept=".xls"</code> attribute.</td>
+      <td>Updated attribute to <code>accept=".xls,.xlsx,.csv"</code> and implemented drag-and-drop dropzone.</td>
+      <td>Ingested modern <code>.xlsx</code> and <code>.csv</code> files successfully. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-06</span></td>
+      <td>Reset Action (Lines 374–376)</td>
+      <td><b>Double Confirm Popup Spam:</b> Clicking "Reset Range" showed two consecutive prompt dialogues.</td>
+      <td>Handler had redundant back-to-back <code>confirm()</code> calls.</td>
+      <td>Consolidated into a single clean confirmation dialogue.</td>
+      <td>Single confirmation prompt resets cutoffs seamlessly. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-07</span></td>
+      <td>Data Casting (Lines 393–404)</td>
+      <td><b>String Concatenation Arithmetic Error:</b> Excel numeric fields read as strings led to sorting flaws.</td>
+      <td>Missing explicit type casting on <code>d["Total Marks"]</code>.</td>
+      <td>Wrapped values in <code>Math.round(Number(d["Total Marks"] || 0))</code>.</td>
+      <td>Verified with string numbers like <code>"85"</code>. Categorized properly. Passed.</td>
+    </tr>
+    <tr>
+      <td><span class="bug-tag">BUG-08</span></td>
+      <td>CSV Export (Lines 472–485)</td>
+      <td><b>CSV Injection / Alignment Breakage:</b> Commas in instructor or course names corrupted output columns.</td>
+      <td>Unquoted string template concatenation in CSV builder.</td>
+      <td>Added RFC 4180 compliant quotation escaping: <code>"${str.replace(/"/g, '""')}"</code>.</td>
+      <td>Verified with course names containing commas; opens perfectly in Excel. Passed.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 style="color:#1e1b4b; margin-top: 30px;">2. Top 3 Meaningful Enhancements</h3>
+
+<div class="enhancement-box">
+  <div class="enhancement-title">1. Statistical Gaussian Relative Auto-Grading (&mu; &plusmn; k&sigma;)</div>
+  <div>Calculates class Mean (&mu;) and Standard Deviation (&sigma;) dynamically and populates optimal relative grading cutoffs following BITS Pilani relative grading policies in 1 click (A: &ge; &mu; + 1.5&sigma;, A-: &ge; &mu; + 1.0&sigma;, B: &ge; &mu; + 0.5&sigma;, etc.). Eliminates manual guesswork for professors.</div>
+</div>
+
+<div class="enhancement-box">
+  <div class="enhancement-title">2. Interactive Real-Time Student Inspector & Roster Preview</div>
+  <div>Embedded a live, searchable, and filterable student roster table below the workspace showing BITS ID, Total Marks, assigned Grade badge, and class percentile rank. Allows instructors to audit borderline cases instantly.</div>
+</div>
+
+<div class="enhancement-box">
+  <div class="enhancement-title">3. 1-Click "Load Sample BITS Dataset" & Universal Drag-and-Drop Dropzone</div>
+  <div>Evaluators and faculty can test the application instantly with realistic synthetic BITS course data (CS F111, EEE F111) with a single click, without needing to create or find an Excel file.</div>
+</div>
+
+<div class="no-print" style="margin-top:20px; text-align:center;">
+  <button onclick="window.print()" style="padding:10px 20px; background:#4338ca; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">🖨️ Print or Save as PDF</button>
+</div>
+
+</body>
+</html>
