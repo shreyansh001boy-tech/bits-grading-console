@@ -464,6 +464,51 @@ tr:hover {
   margin-left: 6px;
 }
 
+.borderline-toggle-btn {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+.borderline-toggle-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+.borderline-toggle-btn.active {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+th.sortable:hover {
+  background: #f1f5f9;
+}
+th .sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.4;
+}
+th.sorted .sort-arrow {
+  opacity: 1;
+  color: var(--bits-primary);
+  font-weight: 800;
+}
+
 @media (max-width: 960px) {
   .workspace { grid-template-columns: 1fr; }
   .controls { grid-template-columns: 1fr; }
@@ -599,25 +644,27 @@ tr:hover {
 <!-- Interactive Student Roster & Live Grade Inspector Table -->
 <div class="student-table-panel" id="tablePanel" style="display:none;">
   <div class="table-header-tools">
-    <div>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <span style="font-weight:700; font-size:15px; color:var(--bits-navy);">
         Live Student Roster & Grade Preview
       </span>
-      <span id="borderlineCountBadge" style="font-size:12px; margin-left:8px; color:var(--warning); font-weight:600;"></span>
+      <button type="button" id="borderlineFilterBtn" class="borderline-toggle-btn" style="display:none;">
+        <span>⚠️</span> <span id="borderlineFilterBtnText">Show Borderline Cases</span>
+      </button>
     </div>
-    <input type="text" class="search-box" id="studentSearch" placeholder="🔍 Search BITS ID or Mark...">
+    <input type="text" class="search-box" id="studentSearch" placeholder="🔍 Search BITS ID, Mark, or Grade...">
   </div>
   <div class="table-container">
     <table id="rosterTable">
       <thead>
         <tr>
-          <th>BITS ID</th>
-          <th>Course</th>
-          <th>Total Marks</th>
-          <th>Assigned Grade</th>
-          <th>Grade Points</th>
-          <th>Percentile</th>
-          <th>Borderline Review Alert</th>
+          <th class="sortable" data-sort="id">BITS ID <span class="sort-arrow" id="arrow-id">↕</span></th>
+          <th class="sortable" data-sort="course">Course <span class="sort-arrow" id="arrow-course">↕</span></th>
+          <th class="sortable sorted" data-sort="marks">Total Marks <span class="sort-arrow" id="arrow-marks">▼</span></th>
+          <th class="sortable" data-sort="grade">Assigned Grade <span class="sort-arrow" id="arrow-grade">↕</span></th>
+          <th class="sortable" data-sort="points">Grade Points <span class="sort-arrow" id="arrow-points">↕</span></th>
+          <th class="sortable" data-sort="percentile">Percentile <span class="sort-arrow" id="arrow-percentile">↕</span></th>
+          <th class="sortable" data-sort="borderline">Borderline Review Alert <span class="sort-arrow" id="arrow-borderline">↕</span></th>
         </tr>
       </thead>
       <tbody id="rosterBody"></tbody>
@@ -780,6 +827,8 @@ function triggerCourseChange() {
   buildGradeUI();
   updateAll();
   document.getElementById("tablePanel").style.display = "block";
+  updateSortHeaders();
+  if (!timerInterval) startTimer();
 }
 
 /* ===== GRADE BOUNDARIES & AUTO CASCADE ===== */
@@ -1014,8 +1063,60 @@ function computeGradeSummary() {
   });
 }
 
+let sortCol = "marks";
+let sortAsc = false; // default: highest marks first
+let filterBorderlineOnly = false;
+
+function updateSortHeaders() {
+  const arrows = {
+    id: "arrow-id",
+    course: "arrow-course",
+    marks: "arrow-marks",
+    grade: "arrow-grade",
+    points: "arrow-points",
+    percentile: "arrow-percentile",
+    borderline: "arrow-borderline"
+  };
+  document.querySelectorAll("th.sortable").forEach(th => {
+    const col = th.dataset.sort;
+    const arrowEl = document.getElementById(arrows[col]);
+    if (col === sortCol) {
+      th.classList.add("sorted");
+      if (arrowEl) arrowEl.textContent = sortAsc ? "▲" : "▼";
+    } else {
+      th.classList.remove("sorted");
+      if (arrowEl) arrowEl.textContent = "↕";
+    }
+  });
+}
+
+document.querySelectorAll("th.sortable").forEach(th => {
+  th.onclick = () => {
+    const col = th.dataset.sort;
+    if (sortCol === col) {
+      sortAsc = !sortAsc;
+    } else {
+      sortCol = col;
+      sortAsc = (col === "id" || col === "course"); // strings asc, numbers desc by default
+    }
+    updateSortHeaders();
+    renderStudentTable();
+  };
+});
+
+const borderlineFilterBtn = document.getElementById("borderlineFilterBtn");
+const borderlineFilterBtnText = document.getElementById("borderlineFilterBtnText");
+
+if (borderlineFilterBtn) {
+  borderlineFilterBtn.onclick = () => {
+    filterBorderlineOnly = !filterBorderlineOnly;
+    renderStudentTable();
+  };
+}
+
 clearFilterBtn.onclick = () => {
   selectedGradeFilter = null;
+  filterBorderlineOnly = false;
   clearFilterBtn.style.display = "none";
   computeGradeSummary();
   renderStudentTable();
@@ -1034,36 +1135,119 @@ function getGradeForMark(mark) {
 function renderStudentTable() {
   const tbody = document.getElementById("rosterBody");
   tbody.innerHTML = "";
-  const query = (document.getElementById("studentSearch").value || "").toLowerCase();
+  const query = (document.getElementById("studentSearch").value || "").toLowerCase().trim();
 
-  const students = data.filter(d => d.Course === courseSelect.value);
-  const total = students.length;
-  if (!total) return;
+  const rawStudents = data.filter(d => d.Course === courseSelect.value);
+  const total = rawStudents.length;
+  if (!total) {
+    if (borderlineFilterBtn) borderlineFilterBtn.style.display = "none";
+    return;
+  }
 
-  students.sort((a, b) => b["Total Marks"] - a["Total Marks"]);
-
+  // Pre-calculate grades, borderline status, percentile metrics
+  const marksSortedAsc = rawStudents.map(s => s["Total Marks"]).sort((a, b) => a - b);
   let borderlineCount = 0;
 
-  students.forEach((s, idx) => {
-    const grade = getGradeForMark(s["Total Marks"]);
-    if (selectedGradeFilter && grade !== selectedGradeFilter) return;
-    if (query && !s["BITS ID"].toLowerCase().includes(query) && !String(s["Total Marks"]).includes(query)) return;
-
-    const percentile = (((total - idx) / total) * 100).toFixed(1) + "%";
-    const gradeClass = "grade-" + grade.replace("-", "m");
-    const points = GRADE_POINTS[grade] !== undefined ? `${GRADE_POINTS[grade]} / 10` : "-";
-
-    // Detect borderline case (within 1 mark of next higher cutoff)
-    let borderlineHtml = '<span style="color:#94a3b8;">None</span>';
+  let enrichedStudents = rawStudents.map(s => {
+    const mark = s["Total Marks"];
+    const grade = getGradeForMark(mark);
     const gradeIdx = GRADES.indexOf(grade);
+    const points = GRADE_POINTS[grade] !== undefined ? GRADE_POINTS[grade] : 0;
+
+    // Percentile rank calculation: (students below + 0.5 * students equal) / total * 100
+    const strictlyBelow = marksSortedAsc.filter(m => m < mark).length;
+    const equals = marksSortedAsc.filter(m => m === mark).length;
+    const pctVal = ((strictlyBelow + 0.5 * equals) / total) * 100;
+    const percentile = pctVal.toFixed(1) + "%";
+
+    // Detect borderline case (within 1 or 2 marks of next higher cutoff)
+    let isBorderline = false;
+    let borderlineDiff = 0;
+    let nextHigherGrade = "";
     if (gradeIdx > 0) {
-      const nextHigherGrade = GRADES[gradeIdx - 1];
+      nextHigherGrade = GRADES[gradeIdx - 1];
       const nextHigherMin = +document.getElementById(nextHigherGrade + "min").value;
-      const diff = nextHigherMin - s["Total Marks"];
+      const diff = nextHigherMin - mark;
       if (diff === 1 || diff === 2) {
+        isBorderline = true;
+        borderlineDiff = diff;
         borderlineCount++;
-        borderlineHtml = `<span class="borderline-tag">⚠️ ${diff} mark away from ${nextHigherGrade}</span>`;
       }
+    }
+
+    return {
+      "BITS ID": s["BITS ID"],
+      "Course": s["Course"],
+      "Total Marks": mark,
+      grade,
+      gradeIdx,
+      points,
+      percentile,
+      pctVal,
+      isBorderline,
+      borderlineDiff,
+      nextHigherGrade
+    };
+  });
+
+  // Update borderline toggle button
+  if (borderlineFilterBtn) {
+    if (borderlineCount > 0) {
+      borderlineFilterBtn.style.display = "inline-flex";
+      borderlineFilterBtnText.textContent = filterBorderlineOnly 
+        ? `Showing ${borderlineCount} Borderline Case${borderlineCount > 1 ? 's' : ''} (Click to Show All)` 
+        : `Filter ${borderlineCount} Borderline Case${borderlineCount > 1 ? 's' : ''}`;
+      borderlineFilterBtn.classList.toggle("active", filterBorderlineOnly);
+    } else {
+      borderlineFilterBtn.style.display = "none";
+      filterBorderlineOnly = false;
+    }
+  }
+
+  // Filter
+  let filtered = enrichedStudents;
+  if (filterBorderlineOnly) {
+    filtered = filtered.filter(s => s.isBorderline);
+  }
+  if (selectedGradeFilter) {
+    filtered = filtered.filter(s => s.grade === selectedGradeFilter);
+  }
+  if (query) {
+    filtered = filtered.filter(s => 
+      s["BITS ID"].toLowerCase().includes(query) || 
+      String(s["Total Marks"]).includes(query) ||
+      s.grade.toLowerCase().includes(query)
+    );
+  }
+
+  // Sort
+  filtered.sort((a, b) => {
+    let cmp = 0;
+    if (sortCol === "id") {
+      cmp = a["BITS ID"].localeCompare(b["BITS ID"]);
+    } else if (sortCol === "course") {
+      cmp = a.Course.localeCompare(b.Course);
+    } else if (sortCol === "marks") {
+      cmp = a["Total Marks"] - b["Total Marks"];
+    } else if (sortCol === "grade") {
+      cmp = a.gradeIdx - b.gradeIdx; // A (0) to E (7)
+    } else if (sortCol === "points") {
+      cmp = a.points - b.points;
+    } else if (sortCol === "percentile") {
+      cmp = a.pctVal - b.pctVal;
+    } else if (sortCol === "borderline") {
+      cmp = (b.isBorderline ? 1 : 0) - (a.isBorderline ? 1 : 0);
+    }
+    return sortAsc ? cmp : -cmp;
+  });
+
+  filtered.forEach(s => {
+    const gradeClass = "grade-" + s.grade.replace("-", "m");
+    const pointsStr = `${s.points} / 10`;
+
+    let borderlineHtml = '<span style="color:#94a3b8;">None</span>';
+    if (s.isBorderline) {
+      borderlineHtml = `<span class="borderline-tag">⚠️ ${s.borderlineDiff} mark${s.borderlineDiff > 1 ? 's' : ''} away from ${s.nextHigherGrade}</span>`;
     }
 
     const tr = document.createElement("tr");
@@ -1071,16 +1255,13 @@ function renderStudentTable() {
       <td><strong>${s["BITS ID"]}</strong></td>
       <td>${s["Course"]}</td>
       <td><strong>${s["Total Marks"]}</strong></td>
-      <td><span class="grade-badge-sm ${gradeClass}">Grade ${grade}</span></td>
-      <td>${points}</td>
-      <td>${percentile}</td>
+      <td><span class="grade-badge-sm ${gradeClass}">Grade ${s.grade}</span></td>
+      <td>${pointsStr}</td>
+      <td>${s.percentile}</td>
       <td>${borderlineHtml}</td>
     `;
     tbody.appendChild(tr);
   });
-
-  const badge = document.getElementById("borderlineCountBadge");
-  badge.innerText = borderlineCount > 0 ? `(${borderlineCount} Borderline Cases Flagged)` : "";
 }
 
 document.getElementById("studentSearch").oninput = () => {
@@ -1104,11 +1285,31 @@ document.getElementById("download").onclick = () => {
   csv += `"Instructor","${instructorInput.value.replace(/"/g, '""')}"\n`;
   csv += `"Course","${courseSelect.value.replace(/"/g, '""')}"\n`;
   csv += `"Class GPA","${document.getElementById("statGPA").textContent}"\n\n`;
-  csv += `BITS ID,Total Marks,Grade,Grade Points\n`;
+  csv += `BITS ID,Course,Total Marks,Assigned Grade,Grade Points,Percentile,Borderline Status\n`;
   
-  data.filter(d => d.Course === courseSelect.value).forEach(d => {
-    const g = getGradeForMark(d["Total Marks"]);
-    csv += `"${d["BITS ID"]}",${d["Total Marks"]},"${g}",${GRADE_POINTS[g] || 0}\n`;
+  const rawList = data.filter(d => d.Course === courseSelect.value);
+  const markList = rawList.map(s => s["Total Marks"]).sort((a, b) => a - b);
+
+  rawList.forEach(d => {
+    const mark = d["Total Marks"];
+    const g = getGradeForMark(mark);
+    const gradeIdx = GRADES.indexOf(g);
+    const pts = GRADE_POINTS[g] !== undefined ? GRADE_POINTS[g] : 0;
+    
+    const strictlyBelow = markList.filter(m => m < mark).length;
+    const equals = markList.filter(m => m === mark).length;
+    const pct = (((strictlyBelow + 0.5 * equals) / rawList.length) * 100).toFixed(1) + "%";
+
+    let borderlineNote = "Normal";
+    if (gradeIdx > 0) {
+      const nextHigherGrade = GRADES[gradeIdx - 1];
+      const nextHigherMin = +document.getElementById(nextHigherGrade + "min").value;
+      const diff = nextHigherMin - mark;
+      if (diff === 1 || diff === 2) {
+        borderlineNote = `Borderline (${diff} mark${diff > 1 ? 's' : ''} away from ${nextHigherGrade})`;
+      }
+    }
+    csv += `"${d["BITS ID"]}","${d["Course"]}",${mark},"${g}",${pts},"${pct}","${borderlineNote}"\n`;
   });
 
   const a = document.createElement("a");
