@@ -509,14 +509,329 @@ th.sorted .sort-arrow {
   font-weight: 800;
 }
 
-@media (max-width: 960px) {
-  .workspace { grid-template-columns: 1fr; }
-  .controls { grid-template-columns: 1fr; }
+/* Micro-Animations & Modern Transitions */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+header, .controls-card, .workspace, .student-table-panel {
+  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.workspace { animation-delay: 0.08s; }
+.student-table-panel { animation-delay: 0.15s; }
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.6);
+  animation: pulseSubtle 2s infinite ease-in-out;
+  margin-right: 4px;
+}
+
+/* 100% Stacked Distribution Bar */
+.dist-bar-wrapper {
+  margin: 14px 0 10px;
+}
+.dist-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #e2e8f0;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+.dist-segment {
+  height: 100%;
+  transition: width 0.35s ease;
+  position: relative;
+  cursor: pointer;
+}
+.dist-segment:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.senate-advisory {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.senate-advisory.warning {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* Action Badges in Header */
+.action-badge {
+  background: #f1f5f9;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+.action-badge:hover {
+  background: #e2e8f0;
+  color: var(--bits-primary);
+  border-color: #cbd5e1;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.modal-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 480px;
+  padding: 20px 24px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.shortcut-row kbd {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  color: var(--text-primary);
+}
+
+/* Dark Theme Palette */
+[data-theme="dark"] {
+  --bg-main: #0b0f19;
+  --card-bg: #111827;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #1e293b;
+  --bits-navy: #93c5fd;
+  --bits-primary: #6366f1;
+  --bits-accent: #818cf8;
+}
+[data-theme="dark"] body {
+  background: #090d16;
+}
+[data-theme="dark"] .stat {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+[data-theme="dark"] .stat.gpa {
+  background: #1e1b4b;
+  border-color: #3730a3;
+}
+[data-theme="dark"] .stat b {
+  color: #f1f5f9;
+}
+[data-theme="dark"] .stat.gpa b {
+  color: #a5b4fc;
+}
+[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] .file-dropzone {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+[data-theme="dark"] th {
+  background: #1e293b;
+  color: #93c5fd;
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] td {
+  border-bottom-color: #1e293b;
+  color: #cbd5e1;
+}
+[data-theme="dark"] tr:hover {
+  background: #1e293b;
+}
+[data-theme="dark"] .grade-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+[data-theme="dark"] .grade-card strong {
+  color: #f1f5f9;
+}
+[data-theme="dark"] .grade-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .grade-pill span.count {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+[data-theme="dark"] .file-guidance {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+[data-theme="dark"] button.secondary {
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #334155;
+}
+[data-theme="dark"] button.secondary:hover {
+  background: #334155;
+}
+[data-theme="dark"] .action-badge {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+[data-theme="dark"] .action-badge:hover {
+  background: #334155;
+  color: #93c5fd;
+}
+[data-theme="dark"] .badge-portal {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+[data-theme="dark"] .shortcut-row kbd {
+  background: #334155;
+  border-color: #475569;
+  color: #f8fafc;
+}
+[data-theme="dark"] .senate-advisory {
+  background: #064e3b;
+  color: #6ee7b7;
+  border-color: #047857;
+}
+[data-theme="dark"] .senate-advisory.warning {
+  background: #451a03;
+  color: #fcd34d;
+  border-color: #78350f;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .controls {
+    grid-template-columns: 1fr 1fr;
+  }
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 12px;
+  }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .header-badges {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .controls {
+    grid-template-columns: 1fr;
+  }
+  .grade-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .table-header-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    max-width: 100%;
+  }
 }
 
 @media print {
-  body { background: #fff; }
-  .controls-card, .file-guidance, .actions, .timer-wrapper, button, input { display: none!important; }
+  body { background: #fff!important; color: #000!important; }
+  .controls-card, .file-guidance, .actions, .timer-wrapper, button, input, .header-badges, .dist-bar-wrapper { display: none!important; }
   .container { max-width: 100%; padding: 0; }
   .table-container { max-height: none; overflow: visible; }
   .workspace { grid-template-columns: 1fr; }
@@ -530,10 +845,12 @@ th.sorted .sort-arrow {
 <!-- Institutional Header -->
 <header>
   <div class="header-titles">
-    <h1>BITS Pilani Digital</h1>
+    <h1>🏛️ BITS Pilani Digital</h1>
     <h2>Examination & Academic Grading Console (CodeForge Certified)</h2>
   </div>
   <div class="header-badges">
+    <button type="button" id="themeToggle" class="action-badge" title="Toggle Dark/Light Mode">🌙 Dark Mode</button>
+    <button type="button" id="shortcutsBtn" class="action-badge" title="View Keyboard Shortcuts">⌨️ Shortcuts</button>
     <span class="badge-portal">Academic Session 2026</span>
     <span class="badge-version">CodeForge v2.5 Verified</span>
   </div>
@@ -595,6 +912,16 @@ th.sorted .sort-arrow {
       <div class="stat gpa">Class GPA<br><b id="statGPA">-</b></div>
     </div>
 
+    <!-- 100% Stacked Grade Distribution Bar & Senate Advisory -->
+    <div class="dist-bar-wrapper">
+      <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">
+        <span>Grade Distribution Allocation</span>
+        <span id="distSummaryText">100% Cohort Spread</span>
+      </div>
+      <div class="dist-bar" id="gradeDistBar"></div>
+      <div id="senateAdvisory" class="senate-advisory" style="display:none;"></div>
+    </div>
+
     <div class="panel-title" style="margin-top:16px; margin-bottom:8px; font-size:13px;">
       <span>Grade Breakdown (Click pill to filter roster)</span>
       <span id="clearFilterBtn" style="font-size:11px; cursor:pointer; color:var(--bits-primary); display:none;">Clear Filter</span>
@@ -633,7 +960,11 @@ th.sorted .sort-arrow {
       </div>
       <div style="font-size:11.5px; color:var(--text-secondary); font-weight:500;">
         Faculty Grading Session Active<br>
-        <span style="font-size:10.5px; color:#16a34a; font-weight:700;">● Examination Lock Synchronized</span>
+        <span class="status-dot"></span>
+        <span style="font-size:10.5px; color:#16a34a; font-weight:700;">Examination Lock Synchronized</span>
+        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:3px;">
+          Hotkeys: <kbd style="font-size:9.5px; padding:1px 4px; border:1px solid #cbd5e1; border-radius:3px;">Ctrl+Enter</kbd> Grade | <kbd style="font-size:9.5px; padding:1px 4px; border:1px solid #cbd5e1; border-radius:3px;">Ctrl+S</kbd> Export
+        </div>
       </div>
     </div>
 
@@ -672,6 +1003,26 @@ th.sorted .sort-arrow {
   </div>
 </div>
 
+</div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div id="shortcutsModal" class="modal-overlay" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="margin:0; font-size:16px; color:var(--bits-navy);">⌨️ Faculty Power-User Shortcuts</h3>
+      <button type="button" id="closeShortcutsBtn" class="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="shortcut-row"><span>Compute BITS Relative Auto-Grade (&mu; &plusmn; k&sigma;)</span> <div><kbd>Ctrl</kbd> + <kbd>Enter</kbd></div></div>
+      <div class="shortcut-row"><span>Finalize & Download Official CSV Sheet</span> <div><kbd>Ctrl</kbd> + <kbd>S</kbd></div></div>
+      <div class="shortcut-row"><span>Print Official Senate Grade Sheet</span> <div><kbd>Ctrl</kbd> + <kbd>P</kbd></div></div>
+      <div class="shortcut-row"><span>Clear Search, Grade Filter & Borderline View</span> <div><kbd>Esc</kbd></div></div>
+      <div class="shortcut-row"><span>Toggle Shortcuts Cheatsheet</span> <div><kbd>Ctrl</kbd> + <kbd>/</kbd></div></div>
+    </div>
+    <div style="margin-top:16px; text-align:right;">
+      <button type="button" id="dismissShortcutsBtn" class="secondary" style="padding:6px 14px; font-size:12px;">Close</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -955,10 +1306,35 @@ function updateAll() {
   renderStudentTable();
 }
 
-/* ===== CANVAS HISTOGRAM & GAUSSIAN BELL CURVE ===== */
+/* ===== CANVAS HISTOGRAM & GAUSSIAN BELL CURVE WITH INTERACTIVE CROSSHAIR ===== */
+let hoverScore = null;
+const histCanvas = document.getElementById("hist");
+
+histCanvas.onmousemove = (e) => {
+  const rect = histCanvas.getBoundingClientRect();
+  const scaleX = histCanvas.width / rect.width;
+  const mouseX = (e.clientX - rect.left) * scaleX;
+  const score = Math.round(((mouseX - 25) / 380) * 100);
+  if (score >= 0 && score <= 100) {
+    hoverScore = score;
+    drawHistogram();
+  } else if (hoverScore !== null) {
+    hoverScore = null;
+    drawHistogram();
+  }
+};
+
+histCanvas.onmouseleave = () => {
+  if (hoverScore !== null) {
+    hoverScore = null;
+    drawHistogram();
+  }
+};
+
 function drawHistogram() {
   const canvas = document.getElementById("hist");
   const ctx = canvas.getContext("2d");
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
   ctx.clearRect(0, 0, 420, 220);
 
   const marks = data.filter(d => d.Course === courseSelect.value).map(d => d["Total Marks"]);
@@ -968,24 +1344,59 @@ function drawHistogram() {
   marks.forEach(m => bins[Math.min(9, Math.floor(m / 10))]++);
   const maxBin = Math.max(...bins, 1);
 
-  // Gradient bars
+  // Gradient bars with dark theme awareness
   bins.forEach((v, i) => {
     const h = (v / maxBin) * 140;
     const grad = ctx.createLinearGradient(0, 180 - h, 0, 180);
-    grad.addColorStop(0, "#4338ca");
-    grad.addColorStop(1, "#c7d2fe");
+    if (isDark) {
+      grad.addColorStop(0, "#818cf8");
+      grad.addColorStop(1, "#312e81");
+    } else {
+      grad.addColorStop(0, "#4338ca");
+      grad.addColorStop(1, "#c7d2fe");
+    }
 
     ctx.fillStyle = grad;
     ctx.fillRect(25 + i * 38, 180 - h, 28, h);
-    ctx.fillStyle = "#64748b";
+    ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
     ctx.font = "10px sans-serif";
     ctx.fillText(`${i*10}`, 30 + i * 38, 198);
   });
 
-  drawBellCurve(ctx, marks);
+  drawBellCurve(ctx, marks, isDark);
+
+  // Interactive Hover Crosshair & Dynamic Score Inspector Tooltip
+  if (hoverScore !== null) {
+    const px = 25 + (hoverScore / 100) * 380;
+    ctx.save();
+    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = isDark ? "#38bdf8" : "#0284c7";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px, 15);
+    ctx.lineTo(px, 180);
+    ctx.stroke();
+    ctx.restore();
+
+    const countAtScore = marks.filter(m => m === hoverScore).length;
+    const g = getGradeForMark(hoverScore);
+    const tipText = `Mark: ${hoverScore} | ${countAtScore} std | Grade ${g}`;
+    
+    ctx.font = "bold 10px sans-serif";
+    const textWidth = ctx.measureText(tipText).width;
+    const tipX = Math.min(Math.max(px - textWidth / 2, 10), 420 - textWidth - 16);
+    
+    ctx.fillStyle = isDark ? "rgba(30, 41, 59, 0.95)" : "rgba(15, 23, 42, 0.9)";
+    ctx.beginPath();
+    ctx.roundRect(tipX - 6, 8, textWidth + 12, 22, 4);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(tipText, tipX, 23);
+  }
 }
 
-function drawBellCurve(ctx, marks) {
+function drawBellCurve(ctx, marks, isDark = false) {
   if (marks.length < 2) return;
   const mean = marks.reduce((a, b) => a + b, 0) / marks.length;
   const variance = marks.reduce((a, b) => a + (b - mean) ** 2, 0) / marks.length;
@@ -994,7 +1405,7 @@ function drawBellCurve(ctx, marks) {
   // Division-by-zero protection
   if (std <= 0.001) return;
 
-  ctx.strokeStyle = "#dc2626";
+  ctx.strokeStyle = isDark ? "#f87171" : "#dc2626";
   ctx.lineWidth = 2.5;
   ctx.beginPath();
   for (let x = 0; x <= 100; x++) {
@@ -1033,10 +1444,62 @@ function computeStats() {
   document.getElementById("statGPA").textContent = `${classGPA}/10`;
 }
 
+function updateDistributionBar(counts, total) {
+  const bar = document.getElementById("gradeDistBar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  if (!total) return;
+
+  const colors = {
+    "A": "#15803d", "A-": "#047857", "B": "#1d4ed8", "B-": "#2563eb",
+    "C": "#b45309", "C-": "#854d0e", "D": "#c2410c", "E": "#b91c1c"
+  };
+
+  GRADES.forEach(g => {
+    const count = counts[g] || 0;
+    if (count > 0) {
+      const pct = ((count / total) * 100).toFixed(1);
+      const seg = document.createElement("div");
+      seg.className = "dist-segment";
+      seg.style.width = `${pct}%`;
+      seg.style.backgroundColor = colors[g];
+      seg.setAttribute("data-tooltip", `Grade ${g}: ${count} (${pct}%)`);
+      seg.onclick = () => {
+        selectedGradeFilter = (selectedGradeFilter === g) ? null : g;
+        clearFilterBtn.style.display = selectedGradeFilter ? "inline" : "none";
+        computeGradeSummary();
+        renderStudentTable();
+      };
+      bar.appendChild(seg);
+    }
+  });
+
+  const advisory = document.getElementById("senateAdvisory");
+  if (advisory) {
+    const aPct = (((counts["A"] || 0) / total) * 100).toFixed(1);
+    const ePct = (((counts["E"] || 0) / total) * 100).toFixed(1);
+    
+    if (aPct > 20) {
+      advisory.className = "senate-advisory warning";
+      advisory.style.display = "flex";
+      advisory.innerHTML = `⚠️ <strong>Senate Guideline Note:</strong> Grade A is ${aPct}% (Recommended &le; 15% for standard relative cohorts).`;
+    } else if (ePct > 12) {
+      advisory.className = "senate-advisory warning";
+      advisory.style.display = "flex";
+      advisory.innerHTML = `⚠️ <strong>Senate Guideline Note:</strong> Grade E is ${ePct}% (Unusually high failing percentage).`;
+    } else {
+      advisory.className = "senate-advisory";
+      advisory.style.display = "flex";
+      advisory.innerHTML = `✓ <strong>Senate Compliance:</strong> Gaussian distribution within normal institutional grading boundaries (A: ${aPct}%, E: ${ePct}%).`;
+    }
+  }
+}
+
 function computeGradeSummary() {
   let counts = {};
   GRADES.forEach(g => counts[g] = 0);
-  data.filter(d => d.Course === courseSelect.value).forEach(d => {
+  const activeStudents = data.filter(d => d.Course === courseSelect.value);
+  activeStudents.forEach(d => {
     for (const g of GRADES) {
       const mi = +document.getElementById(g + "min").value;
       const ma = +document.getElementById(g + "max").value;
@@ -1046,6 +1509,8 @@ function computeGradeSummary() {
       }
     }
   });
+
+  updateDistributionBar(counts, activeStudents.length);
 
   const gradeSummary = document.getElementById("gradeSummary");
   gradeSummary.innerHTML = "";
@@ -1321,6 +1786,87 @@ document.getElementById("download").onclick = () => {
   document.getElementById("thankyou").innerHTML = 
     `✅ <strong>Grading Finalized & Locked!</strong> Completed in ${minT} min ${secT} sec on your ${suffix} attempt. Official grade export downloaded.`;
 };
+
+/* ===== THEME TOGGLE (DARK / LIGHT ACADEMIC MODE) ===== */
+const themeToggle = document.getElementById("themeToggle");
+
+function applyTheme(theme) {
+  if (theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
+    if (themeToggle) themeToggle.textContent = "☀️ Light Mode";
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    if (themeToggle) themeToggle.textContent = "🌙 Dark Mode";
+  }
+  localStorage.setItem("bits_grading_theme", theme);
+  drawHistogram();
+}
+
+if (themeToggle) {
+  themeToggle.onclick = () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    applyTheme(isDark ? "light" : "dark");
+  };
+}
+
+// Initialize theme from storage
+const savedTheme = localStorage.getItem("bits_grading_theme") || 
+  (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+applyTheme(savedTheme);
+
+/* ===== KEYBOARD SHORTCUTS & MODAL ===== */
+const shortcutsModal = document.getElementById("shortcutsModal");
+const shortcutsBtn = document.getElementById("shortcutsBtn");
+const closeShortcutsBtn = document.getElementById("closeShortcutsBtn");
+const dismissShortcutsBtn = document.getElementById("dismissShortcutsBtn");
+
+function toggleShortcutsModal() {
+  if (!shortcutsModal) return;
+  const isHidden = shortcutsModal.style.display === "none";
+  shortcutsModal.style.display = isHidden ? "flex" : "none";
+}
+
+function closeShortcutsModal() {
+  if (shortcutsModal) shortcutsModal.style.display = "none";
+}
+
+if (shortcutsBtn) shortcutsBtn.onclick = toggleShortcutsModal;
+if (closeShortcutsBtn) closeShortcutsBtn.onclick = closeShortcutsModal;
+if (dismissShortcutsBtn) dismissShortcutsBtn.onclick = closeShortcutsModal;
+
+if (shortcutsModal) {
+  shortcutsModal.onclick = (e) => {
+    if (e.target === shortcutsModal) closeShortcutsModal();
+  };
+}
+
+// Global hotkeys
+window.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    const btn = document.getElementById("autoGradeBtn");
+    if (btn) btn.click();
+  } else if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+    e.preventDefault();
+    const dl = document.getElementById("download");
+    if (dl && !dl.disabled) dl.click();
+  } else if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) {
+    e.preventDefault();
+    window.print();
+  } else if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+    e.preventDefault();
+    toggleShortcutsModal();
+  } else if (e.key === "Escape") {
+    closeShortcutsModal();
+    const clr = document.getElementById("clearFilterBtn");
+    if (clr) clr.click();
+    const search = document.getElementById("studentSearch");
+    if (search && search.value) {
+      search.value = "";
+      renderStudentTable();
+    }
+  }
+});
 </script>
 </body>
 </html>
