@@ -44,7 +44,13 @@ This application is an institutional-grade, zero-dependency relative grading con
      - `MATH F111 (Mathematics I - 80 Students)`
      - `EEE F111 (Electrical Sciences - 60 Students)`
    - Finalized exports generate fully quoted, audit-grade CSV sheets including student rank percentiles and borderline review flags.
-6. **Print-Ready Examination Committee Grade Sheet:**
+6. **Interactive Gaussian Distribution Canvas Crosshair & Live Score Tooltip:**
+   - Hovering over the normal curve dynamically projects a dashed crosshair guide and floating badge indicating exact score, frequency, and assigned grade without external charting libraries.
+7. **Institutional Dark / Light Mode Toggle & 100% Stacked Allocation Bar:**
+   - High-contrast Dark theme tailored for late-night faculty grading, paired with a 100% continuous stacked cohort bar featuring automatic BITS Senate compliance checks.
+8. **Faculty Power-User Keyboard Shortcuts Modal:**
+   - Native keybindings (`Ctrl+Enter` to Auto-Grade, `Ctrl+S` to Export CSV, `Ctrl+P` to Print, `Esc` to Reset Filters, `Ctrl+/` for Shortcuts Modal) for high-efficiency grading.
+9. **Print-Ready Examination Committee Grade Sheet:**
    - Formatted `@media print` stylesheet allowing professors to export official, formatted grade sheets directly to PDF for the Senate/Examination Committee.
 
 ---
