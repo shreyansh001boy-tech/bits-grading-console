@@ -3,7 +3,8 @@
 
 > **Submission for BITS Pilani Digital CodeForge Challenge V1.0**  
 > **Student ID:** `2026eb1100208` | **Email:** `2026eb1100208@bitspilani-digital.edu.in`  
-> **Live Production Deployment:** `https://<your-username>.github.io/bits-grading-console/`
+> **Live Production Deployment:** [https://shreyansh001boy-tech.github.io/bits-grading-console/](https://shreyansh001boy-tech.github.io/bits-grading-console/)  
+> **GitHub Repository:** [https://github.com/shreyansh001boy-tech/bits-grading-console](https://github.com/shreyansh001boy-tech/bits-grading-console)
 
 ---
 
@@ -33,14 +34,17 @@ This application is an institutional-grade, zero-dependency relative grading con
    - Automatically computes class Mean ($\mu$) and Standard Deviation ($\sigma$) and dynamically populates optimal relative grading cutoffs following BITS Pilani's relative grading manual ($A \ge \mu + 1.5\sigma$, $B \ge \mu + 0.5\sigma$, etc.) in one click.
 2. **Live BITS 10-Point Class GPA Monitor:**
    - Computes real-time average grade points based on the BITS Pilani 10-point scale ($A=10, A^-=9, B=8, B^-=7, C=6, C^-=5, D=4, E=2$), enabling instructors to instantly verify that the course average is within expected institutional targets (~6.8 to 7.5).
-3. **Automated Borderline Review Detection:**
-   - Automatically scans and flags students who are $\le 2$ marks away from the next higher grade threshold with a clickable alert badge, streamlining the mandatory pre-finalization answer sheet review process.
-4. **Interactive Multi-Cohort Demo Data Ingestion:**
+3. **Automated Borderline Review Detection & 1-Click Moderation Filter:**
+   - Automatically scans and flags students who are $\le 2$ marks away from the next higher grade threshold. Includes a dedicated 1-click filter button (`⚠️ Filter Borderline Cases`) that isolates candidates for academic review, resolving the primary operational bottleneck in institutional grading committees.
+4. **Interactive Student Roster with Multi-Column Sorting & Live Search:**
+   - Full-featured inspector table allowing instructors to click any column header (BITS ID, Total Marks, Assigned Grade, Grade Points, Percentile) to sort ascending/descending with visual indicators, filter by grade pills with a single click, and search by student ID or score with zero latency.
+5. **Multi-Cohort One-Click Institutional Demo Loaders & RFC-4180 CSV Export:**
    - Evaluators can test the console in 1 click across realistic cohorts:
      - `CS F111 (Computer Programming - 120 Students)`
      - `MATH F111 (Mathematics I - 80 Students)`
      - `EEE F111 (Electrical Sciences - 60 Students)`
-5. **Print-Ready Examination Committee Grade Sheet:**
+   - Finalized exports generate fully quoted, audit-grade CSV sheets including student rank percentiles and borderline review flags.
+6. **Print-Ready Examination Committee Grade Sheet:**
    - Formatted `@media print` stylesheet allowing professors to export official, formatted grade sheets directly to PDF for the Senate/Examination Committee.
 
 ---
